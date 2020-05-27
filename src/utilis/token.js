@@ -1,17 +1,17 @@
 //定义个常量存放token
-const MYTONKEY = 'myToken'
+//const MYTONKEY = 'myToken'
 
 //  获取token的值
 export function getToken() {
-    return window.localStorage.getItem('MYTONKEY')
+    return window.localStorage.getItem('myToken')
 }
 
 //设置token
 export function setToken(token) {
-    window.localStorage.setItem('MYTONKEY', token)
+    window.localStorage.setItem('myToken', token)
 }
 
 //删除token
-export function remveToken() {
-    window.localStorage.removeItem('MYTONKEY')
+export function removeToken() {
+    window.localStorage.removeItem('myToken')
 }

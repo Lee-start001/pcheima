@@ -58,7 +58,7 @@
 // 导入注册组件
 import register from "./components/register";
 import { login } from "../../api/login";
-import { setToken } from "@/utilis/token";
+ import { setToken } from "@/utilis/token";
 
 export default {
   components: {
@@ -116,12 +116,11 @@ export default {
             password: this.form.password,
             code: this.form.code
           }).then(res => {
-            console.log("-------------------");
-
             console.log(res);
-            if (res.data.code == 200) {
+            if (res.data.code == 200) {              
               //存储token
-              setToken(res.data.data.token);
+               setToken(res.data.data.token);
+              // window.localStorage.setItem('mytoken',res.data.data.token)
               this.$message.success('登陆成功')
               this.$router.push('/index')
             }else{
