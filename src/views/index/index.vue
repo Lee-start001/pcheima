@@ -7,22 +7,15 @@
         <span>在线答疑</span>
       </div>
       <div class="right">
-        <img :src="avatar" alt />
-        <span class="name">{{username}},你好</span>
+        <img :src="$store.state.avatar" alt />
+        <span class="name">{{$store.state.username}},你好</span>
         <el-button class="but" type="primary" size="mini" @click="logout">退出</el-button>
       </div>
     </el-header>
     <el-container>
       <!-- 侧边导航栏 -->
       <el-aside class="my_Aside" width="auto">
-        <el-menu
-          default-active="1"
-          class="el-menu-vertical-demo"
-          @open="handleOpen"
-          @close="handleClose"
-          :collapse="isCollapse"
-          router
-        >
+        <el-menu default-active="1" class="el-menu-vertical-demo" :collapse="isCollapse" router>
           <!-- index的数组代表路由地址 -->
           <el-menu-item index="/index/chart">
             <i class="el-icon-menu"></i>
@@ -59,8 +52,8 @@
 </template>
 
 <script>
-import { getInfo, outInfo } from "../../api/index";
-import { removeToken } from "../../utilis/token";
+import { outInfo } from "../../api/index";
+import { removeToken, getToken } from "../../utilis/token";
 export default {
   data() {
     return {
@@ -72,6 +65,7 @@ export default {
       isCollapse: true
     };
   },
+
   methods: {
     //点击数据显示数据页面
     goshuju() {
@@ -89,6 +83,9 @@ export default {
             console.log(res);
             //删除本地的token 并跳转至登录页面
             removeToken();
+            //删除vuex数据
+            this.$store.commit("changeUsername", "");
+            this.$store.commit("changeAvatar", "");
             this.$router.push("/");
           });
           this.$message({
@@ -104,16 +101,14 @@ export default {
         });
     }
   },
-  created() {
-    getInfo().then(res => {
-      console.log(res);
-
-      this.username = res.data.data.username;
-      // 记得在前面还要拼接基地址，因为返回的头像路径不完整，要拼接
-      //   // 还要拼接/，不然就连在一起了
-      this.avatar = process.env.VUE_APP_URL + "/" + res.data.data.avatar;
-    });
-  }
+  beforeCreate() {
+    if (getToken() == null) {
+      this.$message.error("请先登录");
+      //转向登录页面
+      this.$router.push("/");
+    }
+  },
+  created() {}
 };
 </script>
 

@@ -23,6 +23,15 @@ import question from '../views/index/question/question.vue'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
+// 导入提示框
+import { Message } from 'element-ui';
+
+//导入vux
+import store from '../store/index.js'
+
+//导入登录
+import { getInfo } from "../api/index";
+import { removeToken } from "../utilis/token";
 //  注册路由
 Vue.use(VueRouter)
 
@@ -31,31 +40,42 @@ const router = new VueRouter({
     routes: [
         {
             path: "/",
-            component: login
+            component: login,
+            meta: { title: '登录' }
+        },
+        {
+            path: "/login",
+            redirect: "/"
         },
         {
             path: "/index",
             component: index,
+            meta: { title: '首页' },
             children: [
                 {
                     path: 'user',
-                    component: user
+                    component: user,
+                    meta: { title: '用户' }
                 },
                 {
                     path: 'chart',
-                    component: chart
+                    component: chart,
+                    meta: { title: '数据' }
                 },
                 {
                     path: 'question',
-                    component: question
+                    component: question,
+                    meta: { title: '题库' }
                 },
                 {
                     path: 'business',
-                    component: business
+                    component: business,
+                    meta: { title: '企业' }
                 },
                 {
                     path: 'subject',
-                    component: subject
+                    component: subject,
+                    meta: { title: '学科' }
                 },
             ]
         },
@@ -63,16 +83,41 @@ const router = new VueRouter({
     ]
 })
 
+let whiteUrl = ['/', 'zhuce', 'guanggao']
 //  导航守卫
 router.beforeEach((to, from, next) => {
     // to and from are both route objects. must call `next`.
     NProgress.start();
-    //放行
-    next()
+    //判断是否去往登录页面
+    //if (to.path == '/')
+    if (whiteUrl.includes(to.path)) {
+        //放行
+        next()
+    } else {
+        getInfo().then(res => {
+            if (res.data.code == 200) {
+                store.commit('changeUsername', res.data.data.username)
+                store.commit('changeAvatar', process.env.VUE_APP_URL + '/' + res.data.data.avatar)
+                //放行
+                next()
+            } else {
+                //提示登录错误
+                Message.error('登录异常')
+                //放行至登录页
+                next('/')
+                //删除本地token
+                removeToken()
+                //手结束进度条
+                NProgress.done();
+            }
+        })
+    }
+
 })
 
-router.afterEach(() => {
+router.afterEach((to) => {
     // to and from are both route objects.
+    document.title = to.meta.title
     NProgress.done();
 })
 //  暴露出去  输需要 谁导入即可
